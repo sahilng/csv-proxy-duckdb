@@ -46,7 +46,7 @@ The application can be customized using environment variables:
 - `CACHE_DIR`: Directory to store temporary CSV files (default: `cache`).
 - `DB_PATH`: Path to your DuckDB database file (default: `local.db`).
 - `LOG_FILE`: File to write logs to (default: `app.log`).
-- `LOG_LEVEL`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`).
+- `LOG_LEVEL`: Logging level \[`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`\] (default: `INFO`).
 
 ### Setting Environment Variables
 
