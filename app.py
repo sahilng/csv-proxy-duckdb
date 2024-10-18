@@ -14,6 +14,7 @@ CACHE_DIR = os.environ.get('CACHE_DIR', 'cache')
 DB_PATH = os.environ.get('DB_PATH', 'local.db')
 LOG_FILE = os.environ.get('LOG_FILE', 'app.log')
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+PORT = os.environ.get('PORT', 3500)
 
 # Ensure the cache directory exists
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -135,4 +136,4 @@ def download_csv(database: str, schema: str, view: str):
     return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name=f"{view}.csv")
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=3500)
+    app.run('0.0.0.0', port=PORT)
