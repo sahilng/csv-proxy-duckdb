@@ -36,7 +36,7 @@ def is_valid_identifier(name):
     return re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name) is not None
 
 def hash_token(token):
-    """Hash the motherduck_token using SHA-256."""
+    """Hash the token or connection string using SHA-256."""
     return hashlib.sha256(token.encode('utf-8')).hexdigest()
 
 def generate_csv(database: str, schema: str, view: str, connection_string: str, file_path: str) -> bool:
@@ -103,19 +103,21 @@ def download_csv(database: str, schema: str, view: str):
         Response: A Flask response object to send the CSV file.
     """
     motherduck_token = request.args.get('motherduck_token')
-    token_hash = None
     if motherduck_token:
         # URL-encode the token to prevent injection attacks
         encoded_token = urllib.parse.quote(motherduck_token, safe='')
         connection_string = f'md:?motherduck_token={encoded_token}'
 
-        # Hash the token to use in the cache file path
+        # Hash the token to use in the cache directory path
         token_hash = hash_token(motherduck_token)
     else:
+        # Use DB_PATH as the connection string
         connection_string = DB_PATH
-        token_hash = 'no_token'
+        # Hash the DB_PATH to use in the cache directory path
+        token_hash = hash_token(DB_PATH)
 
-    dir_path = os.path.join(CACHE_DIR, database, schema, token_hash)
+    # Now token_hash is the top-level directory under CACHE_DIR
+    dir_path = os.path.join(CACHE_DIR, token_hash, database, schema)
     os.makedirs(dir_path, exist_ok=True)
 
     file_name = f"{view}.csv"
