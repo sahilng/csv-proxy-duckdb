@@ -133,7 +133,6 @@ docker build -t csv-proxy-duckdb .
 
 ```bash
 docker run -d -p 3500:3500 \
-  --name csv-proxy-duckdb \
   csv-proxy-duckdb
 ```
 
@@ -141,9 +140,7 @@ docker run -d -p 3500:3500 \
 
 ```bash
 docker run -d -p 3500:3500 \
-  -e DB_PATH=/app/local.db \
   -e LOG_LEVEL=DEBUG \
-  --name csv-proxy-duckdb \
   csv-proxy-duckdb
 ```
 
