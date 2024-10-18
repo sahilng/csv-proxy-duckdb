@@ -1,32 +1,25 @@
 import os
-import uuid
 import re
 import logging
+import threading
+import urllib.parse
 
-from flask import Flask, abort, send_file, request, after_this_request
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-
+from flask import Flask, abort, send_file, request
+from datetime import datetime, timedelta
 import duckdb
 
 # Configuration
 CACHE_DIR = os.environ.get('CACHE_DIR', 'cache')
+CACHE_MINUTES = int(os.environ.get('CACHE_MINUTES', 1))  # Convert to integer
 DB_PATH = os.environ.get('DB_PATH', 'local.db')
 LOG_FILE = os.environ.get('LOG_FILE', 'app.log')
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
-PORT = os.environ.get('PORT', 3500)
+PORT = int(os.environ.get('PORT', 3500))  # Convert to integer
 
 # Ensure the cache directory exists
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 app = Flask(__name__)
-
-# Set up rate limiting
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["2000 per day", "500 per hour"]
-)
 
 # Set up logging
 logging.basicConfig(
@@ -42,7 +35,7 @@ def is_valid_identifier(name):
     """Validate that the provided name is a valid SQL identifier."""
     return re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name) is not None
 
-def generate_csv(database: str, schema: str, view: str, connection_string: str) -> str:
+def generate_csv(database: str, schema: str, view: str, connection_string: str, file_path: str) -> bool:
     """
     Generate a CSV file from the specified DuckDB view.
 
@@ -51,23 +44,16 @@ def generate_csv(database: str, schema: str, view: str, connection_string: str) 
         schema (str): The schema name.
         view (str): The view name.
         connection_string (str): The DuckDB connection string.
+        file_path (str): The path where the CSV file will be saved.
 
     Returns:
-        str: The path to the generated CSV file, or None if generation failed.
+        bool: True if CSV generation succeeded, False otherwise.
     """
     if not all(map(is_valid_identifier, [database, schema, view])):
         logging.warning(f"Invalid identifiers provided: {database}, {schema}, {view}")
-        return None
+        return False
 
     logging.info(f"Generating CSV for view '{database}.{schema}.{view}'")
-
-    # Ensure directory for the file exists
-    dir_path = os.path.join(CACHE_DIR, database, schema)
-    os.makedirs(dir_path, exist_ok=True)
-
-    # Use a unique file name
-    file_name = f"{view}_{uuid.uuid4().hex}.csv"
-    file_path = os.path.join(dir_path, file_name)
 
     connection = None
     try:
@@ -82,22 +68,24 @@ def generate_csv(database: str, schema: str, view: str, connection_string: str) 
         result = connection.execute(check_query, [database, schema, view]).fetchone()
         if not result:
             logging.warning(f"View '{database}.{schema}.{view}' does not exist")
-            return None
+            return False
+
+        # Escape single quotes in file_path to prevent SQL injection
+        safe_file_path = file_path.replace("'", "''")
 
         # Build the query safely
-        query = f"COPY (SELECT * FROM \"{database}\".\"{schema}\".\"{view}\") TO '{file_path}' (HEADER, DELIMITER ',');"
+        query = f"COPY (SELECT * FROM \"{database}\".\"{schema}\".\"{view}\") TO '{safe_file_path}' (HEADER, DELIMITER ',');"
         connection.execute(query)
         logging.info(f"CSV generated for view '{database}.{schema}.{view}' at '{file_path}'")
-        return file_path
+        return True
     except Exception as e:
         logging.error(f"Failed to generate CSV for view '{database}.{schema}.{view}': {e}")
-        return None
+        return False
     finally:
         if connection:
             connection.close()
 
 @app.route('/<string:database>/<string:schema>/<string:view>.csv')
-@limiter.limit("100 per minute")  # Additional per-route rate limit
 def download_csv(database: str, schema: str, view: str):
     """
     Flask route to handle CSV download requests.
@@ -112,28 +100,40 @@ def download_csv(database: str, schema: str, view: str):
     """
     motherduck_token = request.args.get('motherduck_token')
     if motherduck_token:
-        connection_string = f'md:?motherduck_token={motherduck_token}'
+        # URL-encode the token to prevent injection attacks
+        encoded_token = urllib.parse.quote(motherduck_token, safe='')
+        connection_string = f'md:?motherduck_token={encoded_token}'
     else:
         connection_string = DB_PATH
 
-    # Generate the latest CSV for every request
-    file_path = generate_csv(database, schema, view, connection_string)
+    dir_path = os.path.join(CACHE_DIR, database, schema)
+    os.makedirs(dir_path, exist_ok=True)
 
-    if file_path is None:
-        # If the CSV generation fails, return a 404 error
-        abort(404, description="View not found or failed to generate CSV")
+    file_name = f"{view}.csv"
+    file_path = os.path.join(dir_path, file_name)
 
-    @after_this_request
-    def remove_file(response):
-        try:
-            os.remove(file_path)
-            logging.info(f"Deleted file '{file_path}' after sending")
-        except Exception as e:
-            logging.error(f"Error deleting file '{file_path}': {e}")
-        return response
+    # Use file modification time for caching
+    file_exists = os.path.exists(file_path)
+    is_cached = False
 
-    # Serve the freshly generated CSV
-    return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name=f"{view}.csv")
+    if file_exists:
+        file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
+        if datetime.now() - file_mtime < timedelta(minutes=CACHE_MINUTES):
+            is_cached = True
+
+    if is_cached:
+        logging.info(f"Serving cached CSV for view '{database}.{schema}.{view}'")
+        return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name=f"{view}.csv")
+    else:
+        # Generate the latest CSV
+        generated_csv = generate_csv(database, schema, view, connection_string, file_path)
+
+        if not generated_csv:
+            # If the CSV generation fails, return a 404 error
+            abort(404, description="View not found or failed to generate CSV")
+
+        # Serve the CSV
+        return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name=f"{view}.csv")
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=PORT)

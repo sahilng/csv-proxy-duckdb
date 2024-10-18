@@ -8,14 +8,9 @@ Many mapping and data visualization tools can only ingest live data via CSV link
 
 ## Features
 
-- Dynamically generates CSV files from DuckDB database queries on each request.
-- Proxies requests to DuckDB, allowing real-time data to be served in CSV format.
-- Supports custom database paths and flexible query structures for different datasets.
+- Proxies requests to DuckDB and caches CSV files based on file modification time, serving real-time data when the cache is outdated.
 - Lightweight, easily deployable using Flask or Docker.
-- Ideal for integration with mapping or visualization tools that require live CSV links.
-- Supports authentication with a `motherduck_token` query parameter for secure access to remote DuckDB databases.
-- Custom database path defaults to a local DuckDB file if no token is provided.
-- Rate limiting and input validation for enhanced security.
+- Supports authentication with a `motherduck_token` query parameter for secure access to MotherDuck.
 
 ## Installation
 
@@ -44,9 +39,11 @@ Many mapping and data visualization tools can only ingest live data via CSV link
 The application can be customized using environment variables:
 
 - `CACHE_DIR`: Directory to store temporary CSV files (default: `cache`).
+- `CACHE_MINUTES`: Number of minutes to cache results for (default: `1`).
 - `DB_PATH`: Path to your DuckDB database file (default: `local.db`).
 - `LOG_FILE`: File to write logs to (default: `app.log`).
 - `LOG_LEVEL`: Logging level \[`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`\] (default: `INFO`).
+- `PORT`: Port to run the server on (default: `3500`).
 
 ### Setting Environment Variables
 
@@ -110,16 +107,6 @@ curl -O "http://localhost:3500/local/main/test.csv?motherduck_token=your_token_h
 ## CORS
 
 Cross-Origin Resource Sharing (CORS) is enabled by default to allow cross-origin access. Configure the allowed origins based on your security requirements.
-
-## Security Considerations
-
-- **Input Validation**: Prevents SQL injection and directory traversal attacks.
-- **Rate Limiting**: Protects against denial-of-service attacks.
-- **Authentication**: Secure access to remote DuckDB databases with `motherduck_token`.
-- **Recommendations**:
-  - Use HTTPS in production.
-  - Secure environment variables and secrets.
-  - Restrict access using firewall rules.
 
 ## Docker Deployment
 
