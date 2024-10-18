@@ -1,7 +1,7 @@
 import os
 import re
 import logging
-import threading
+import hashlib
 import urllib.parse
 
 from flask import Flask, abort, send_file, request
@@ -34,6 +34,10 @@ logging.basicConfig(
 def is_valid_identifier(name):
     """Validate that the provided name is a valid SQL identifier."""
     return re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name) is not None
+
+def hash_token(token):
+    """Hash the motherduck_token using SHA-256."""
+    return hashlib.sha256(token.encode('utf-8')).hexdigest()
 
 def generate_csv(database: str, schema: str, view: str, connection_string: str, file_path: str) -> bool:
     """
@@ -79,7 +83,7 @@ def generate_csv(database: str, schema: str, view: str, connection_string: str, 
         logging.info(f"CSV generated for view '{database}.{schema}.{view}' at '{file_path}'")
         return True
     except Exception as e:
-        logging.error(f"Failed to generate CSV for view '{database}.{schema}.{view}': {e}")
+        logging.error(f"Failed to generate CSV for view '{database}.{schema}.{view}': {e}", exc_info=True)
         return False
     finally:
         if connection:
@@ -99,14 +103,19 @@ def download_csv(database: str, schema: str, view: str):
         Response: A Flask response object to send the CSV file.
     """
     motherduck_token = request.args.get('motherduck_token')
+    token_hash = None
     if motherduck_token:
         # URL-encode the token to prevent injection attacks
         encoded_token = urllib.parse.quote(motherduck_token, safe='')
         connection_string = f'md:?motherduck_token={encoded_token}'
+
+        # Hash the token to use in the cache file path
+        token_hash = hash_token(motherduck_token)
     else:
         connection_string = DB_PATH
+        token_hash = 'no_token'
 
-    dir_path = os.path.join(CACHE_DIR, database, schema)
+    dir_path = os.path.join(CACHE_DIR, database, schema, token_hash)
     os.makedirs(dir_path, exist_ok=True)
 
     file_name = f"{view}.csv"
@@ -122,7 +131,7 @@ def download_csv(database: str, schema: str, view: str):
             is_cached = True
 
     if is_cached:
-        logging.info(f"Serving cached CSV for view '{database}.{schema}.{view}'")
+        logging.info(f"Serving cached CSV for view '{database}.{schema}.{view}' with token hash '{token_hash}'")
         return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name=f"{view}.csv")
     else:
         # Generate the latest CSV
