@@ -132,8 +132,7 @@ docker build -t csv-proxy-duckdb .
 ### Run the Docker Container
 
 ```bash
-docker run -d -p 3500:3500 \
-  csv-proxy-duckdb
+docker run -d -p 3500:3500 csv-proxy-duckdb
 ```
 
 ### Passing Environment Variables
