@@ -25,7 +25,7 @@ app = Flask(__name__)
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=["2000 per day", "500 per hour"]
 )
 
 # Set up logging
@@ -97,7 +97,7 @@ def generate_csv(database: str, schema: str, view: str, connection_string: str) 
             connection.close()
 
 @app.route('/<string:database>/<string:schema>/<string:view>.csv')
-@limiter.limit("10 per minute")  # Additional per-route rate limit
+@limiter.limit("100 per minute")  # Additional per-route rate limit
 def download_csv(database: str, schema: str, view: str):
     """
     Flask route to handle CSV download requests.
