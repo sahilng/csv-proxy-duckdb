@@ -11,7 +11,7 @@ import duckdb
 
 # Configuration
 CACHE_DIR = os.environ.get('CACHE_DIR', 'cache')
-DEFAULT_DB_PATH = os.environ.get('DEFAULT_DB_PATH', 'local.db')
+DB_PATH = os.environ.get('DB_PATH', 'local.db')
 LOG_FILE = os.environ.get('LOG_FILE', 'app.log')
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
 
@@ -113,7 +113,7 @@ def download_csv(database: str, schema: str, view: str):
     if motherduck_token:
         connection_string = f'md:?motherduck_token={motherduck_token}'
     else:
-        connection_string = DEFAULT_DB_PATH
+        connection_string = DB_PATH
 
     # Generate the latest CSV for every request
     file_path = generate_csv(database, schema, view, connection_string)

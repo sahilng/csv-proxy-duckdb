@@ -44,14 +44,14 @@ Many mapping and data visualization tools can only ingest live data via CSV link
 The application can be customized using environment variables:
 
 - `CACHE_DIR`: Directory to store temporary CSV files (default: `cache`).
-- `DEFAULT_DB_PATH`: Path to your DuckDB database file (default: `local.db`).
+- `DB_PATH`: Path to your DuckDB database file (default: `local.db`).
 - `LOG_FILE`: File to write logs to (default: `app.log`).
 - `LOG_LEVEL`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`).
 
 ### Setting Environment Variables
 
 ```bash
-export DEFAULT_DB_PATH=/path/to/your/database.db
+export DB_PATH=/path/to/your/database.db
 export LOG_LEVEL=DEBUG
 ```
 
@@ -141,7 +141,7 @@ docker run -d -p 3500:3500 \
 
 ```bash
 docker run -d -p 3500:3500 \
-  -e DEFAULT_DB_PATH=/app/local.db \
+  -e DB_PATH=/app/local.db \
   -e LOG_LEVEL=DEBUG \
   --name csv-proxy-duckdb \
   csv-proxy-duckdb
