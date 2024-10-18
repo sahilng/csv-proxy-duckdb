@@ -17,11 +17,6 @@ Many mapping and data visualization tools can only ingest live data via CSV link
 - Custom database path defaults to a local DuckDB file if no token is provided.
 - Rate limiting and input validation for enhanced security.
 
-## Prerequisites
-
-- **Python 3.7 or higher**
-- **DuckDB**: Ensure you have DuckDB installed if you're not using the local database file.
-
 ## Installation
 
 1. **Clone the repository**:
