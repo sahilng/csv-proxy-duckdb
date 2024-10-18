@@ -87,7 +87,7 @@ http://localhost:3500/local/main/test.csv
 If you need to access MotherDuck using a `motherduck_token`, append the token to the URL as a query parameter:
 
 ```
-http://localhost:3500/local/main/test.csv?motherduck_token=your_token_here
+http://localhost:3500/remote/main/test.csv?motherduck_token=your_token_here
 ```
 
 ### Testing with `curl`
@@ -101,12 +101,8 @@ curl -O http://localhost:3500/local/main/test.csv
 Retrieve a CSV with `motherduck_token`:
 
 ```bash
-curl -O "http://localhost:3500/local/main/test.csv?motherduck_token=your_token_here"
+curl -O "http://localhost:3500/remote/main/test.csv?motherduck_token=your_token_here"
 ```
-
-## CORS
-
-Cross-Origin Resource Sharing (CORS) is enabled by default to allow cross-origin access. Configure the allowed origins based on your security requirements.
 
 ## Docker Deployment
 
