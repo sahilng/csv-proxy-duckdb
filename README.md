@@ -12,28 +12,6 @@ Many mapping and data visualization tools can only ingest live data via CSV link
 - Lightweight, easily deployable using Flask or Docker.
 - Supports authentication with a `motherduck_token` query parameter for secure access to MotherDuck.
 
-## Installation
-
-1. **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/sahilng/csv-proxy-duckdb.git
-   cd csv-proxy-duckdb
-   ```
-
-2. **Create and activate a virtual environment**:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
 ## Configuration
 
 The application can be customized using environment variables:
@@ -45,24 +23,7 @@ The application can be customized using environment variables:
 - `LOG_LEVEL`: Logging level \[`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`\] (default: `INFO`).
 - `PORT`: Port to run the server on (default: `3500`).
 
-### Setting Environment Variables
-
-```bash
-export DB_PATH=/path/to/your/database.db
-export LOG_LEVEL=DEBUG
-```
-
-## Usage
-
-### Running the Server
-
-Start the Flask server:
-
-```bash
-python app.py
-```
-
-### Example URL Usage
+### Usage
 
 Once the server is running, you can request CSV data by accessing URLs like the following:
 
@@ -89,21 +50,3 @@ If you need to access MotherDuck using a `motherduck_token`, append the token to
 ```
 http://localhost:3500/remote/main/test.csv?motherduck_token=your_token_here
 ```
-
-## Docker Deployment
-
-### Build the Docker Image
-
-```bash
-docker build -t csv-proxy-duckdb .
-```
-
-### Run the Docker Container
-
-```bash
-docker run -d -p 3500:3500 csv-proxy-duckdb
-```
-
-## AI Disclaimer
-
-This code was generated with the assistance of `gpt-4o` and `o1-preview`.
