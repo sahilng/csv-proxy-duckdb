@@ -88,7 +88,7 @@ def generate_csv(database: str, schema: str, view: str, connection_string: str, 
         # Build the query safely
         query = f"COPY (SELECT * FROM \"{database}\".\"{schema}\".\"{view}\") TO '{safe_file_path}' (HEADER, DELIMITER ',');"
         connection.execute(query)
-        logging.info(f"CSV generated for view '{database}.{schema}.{view}' at '{file_path}'")
+        logging.info(f"CSV generated for '{database}.{schema}.{view}' at '{file_path}'")
         return True
     except Exception as e:
         logging.error(f"Failed to generate CSV for view '{database}.{schema}.{view}': {e}", exc_info=True)
@@ -141,7 +141,7 @@ def download_csv(database: str, schema: str, view: str):
             is_cached = True
 
     if is_cached:
-        logging.info(f"Serving cached CSV for view '{database}.{schema}.{view}' with token hash '{token_hash}'")
+        logging.info(f"Serving cached CSV for '{database}.{schema}.{view}' at '{file_path}'")
         return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name=f"{view}.csv")
     else:
         # Generate the latest CSV
