@@ -90,20 +90,6 @@ If you need to access MotherDuck using a `motherduck_token`, append the token to
 http://localhost:3500/remote/main/test.csv?motherduck_token=your_token_here
 ```
 
-### Testing with `curl`
-
-Retrieve a CSV without authentication:
-
-```bash
-curl -O http://localhost:3500/local/main/test.csv
-```
-
-Retrieve a CSV with `motherduck_token`:
-
-```bash
-curl -O "http://localhost:3500/remote/main/test.csv?motherduck_token=your_token_here"
-```
-
 ## Docker Deployment
 
 ### Build the Docker Image
@@ -116,14 +102,6 @@ docker build -t csv-proxy-duckdb .
 
 ```bash
 docker run -d -p 3500:3500 csv-proxy-duckdb
-```
-
-### Passing Environment Variables
-
-```bash
-docker run -d -p 3500:3500 \
-  -e LOG_LEVEL=DEBUG \
-  csv-proxy-duckdb
 ```
 
 ## AI Disclaimer
