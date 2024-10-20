@@ -3,9 +3,9 @@ import re
 import logging
 import hashlib
 import urllib.parse
+from datetime import datetime, timedelta
 
 from flask import Flask, abort, send_file, request
-from datetime import datetime, timedelta
 import duckdb
 
 # Configuration
