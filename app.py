@@ -61,8 +61,6 @@ def generate_csv(database: str, schema: str, view: str, connection_string: str, 
         logging.warning(f"Invalid identifiers provided: {database}, {schema}, {view}")
         return False
 
-    logging.info(f"Generating CSV for view '{database}.{schema}.{view}'")
-
     connection = None
     try:
         # Connect to DuckDB
