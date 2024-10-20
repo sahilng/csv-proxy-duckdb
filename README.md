@@ -1,6 +1,6 @@
 # csv-proxy-duckdb
 
-**csv-proxy-duckdb** is a lightweight Flask-based service designed to serve dynamically generated CSV files from DuckDB query results via a simple HTTP interface. This service is particularly useful for tools that require live data in CSV format, such as mapping or visualization platforms that support CSV links.
+**csv-proxy-duckdb** is a lightweight Flask-based service designed to serve dynamically generated CSV files from DuckDB query results via a simple HTTP interface.
 
 ## Motivation
 
