@@ -17,7 +17,7 @@ Many mapping and data visualization tools can only ingest live data via CSV link
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/DoSomething/csv-proxy-duckdb.git
+   git clone https://github.com/sahilng/csv-proxy-duckdb.git
    cd csv-proxy-duckdb
    ```
 
