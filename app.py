@@ -31,6 +31,10 @@ logging.basicConfig(
     ]
 )
 
+# Hide Flask logs
+if LOG_LEVEL != 'DEBUG':
+    logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
+
 def is_valid_identifier(name):
     """Validate that the provided name is a valid SQL identifier."""
     return re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name) is not None
