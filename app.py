@@ -75,7 +75,7 @@ def generate_csv(database: str, schema: str, view: str, connection_string: str, 
         if not result:
             logging.warning(f"View '{database}.{schema}.{view}' does not exist")
             
-            # Remove the cached file if it exists
+            # Remove the cached file if the view no longer exists
             if os.path.exists(file_path):
                 os.remove(file_path)
                 logging.info(f"Removed cached file '{file_path}' due to missing view")
