@@ -6,6 +6,7 @@ import urllib.parse
 from datetime import datetime, timedelta
 
 from flask import Flask, abort, send_file, request
+from flask_cors import CORS
 import duckdb
 
 # Configuration
@@ -15,11 +16,15 @@ DB_PATH = os.environ.get('DB_PATH', 'local.db')
 LOG_FILE = os.environ.get('LOG_FILE', 'app.log')
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
 PORT = int(os.environ.get('PORT', 3500))  # Convert to integer
+ALLOW_CORS = int(os.environ.get('CORS', 1))
 
 # Ensure the cache directory exists
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 app = Flask(__name__)
+
+if ALLOW_CORS == 1:
+    CORS(app)
 
 # Set up logging
 logging.basicConfig(

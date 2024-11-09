@@ -22,6 +22,7 @@ The application can be customized using environment variables:
 - `LOG_FILE`: File to write logs to (default: `app.log`).
 - `LOG_LEVEL`: Logging level \[`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`\] (default: `INFO`).
 - `PORT`: Port to run the server on (default: `3500`).
+- `ALLOW_CORS`: Allow CORS: 0 is No, 1 is Yes (default: `1`).
 
 ### Usage
 
