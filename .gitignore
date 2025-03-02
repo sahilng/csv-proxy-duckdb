@@ -4,3 +4,4 @@ cache/
 venv/
 *.db
 duckdb
+.DS_Store
